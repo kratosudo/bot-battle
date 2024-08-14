@@ -1,35 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect} from 'react';
+import BotCollection from "./Components/BotCollection.jsx";
 
-function App() {
-  const [count, setCount] = useState(0)
+import YourBotArmy from "./Components/YourBotArmy.jsx";
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
 
-export default App
+function App (){
+    const [bots, setBots] = useState([]);
+    const [army, setArmy] = useState([]);
+
+    //fetch bot data
+    useEffect(() => {
+        fetch("https://bots-s8ny.onrender.com/bots")
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log(data);
+            setBots(data);
+        })
+        .catch((error) => {
+            console.error("Error fetching bot data", error);
+        });
+    }, []);
+
+
+    //add to bot army
+    const addToArmy = (selectBot) => {
+        if (!army.includes(selectBot)) {
+            setArmy((prevArmy) => [...prevArmy, selectBot]);
+        };
+    };
+
+        //remove bot
+        const releaseFromArmy = (releasedBot) => {
+            setArmy((prevArmy) => prevArmy.filter((bot) => bot.id !== releasedBot.id));
+        };
+
+        //discharge bot from collection
+
+        const dischargeBot = (botId) => {
+            setBots((preBots) => preBots.filter((bot) => bot.id !== bot.id));
+        };
+
+    
+    return (
+        <div>
+            <h1>War Bots</h1>
+            <div>
+                <BotCollection
+                bots={bots}
+                addToArmy={addToArmy}
+                dischargeBot={dischargeBot}
+                />
+            </div>
+            <div>
+                <h2>Your Bot Army</h2>
+                <YourBotArmy
+                army={army}
+                onReleaseFromArmy={releaseFromArmy} />
+            </div>
+        </div>
+    );
+};
+export default App;
